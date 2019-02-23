@@ -38,5 +38,5 @@ innodb_buffer_pool_size=4G
 EOF
 
 cd $HOMEDIR/mysql-$SERVER_VERSION/sql
-../runtime_output_directory/mysqld --defaults-file=$HOMEDIR/my-mysql-8.0.cnf
+../runtime_output_directory/mysqld --defaults-file=$HOMEDIR/my-mysql-8.0.cnf &
 
