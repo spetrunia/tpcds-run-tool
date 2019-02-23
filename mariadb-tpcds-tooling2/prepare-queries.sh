@@ -8,8 +8,6 @@ SOCKET="--socket=/tmp/mysql20.sock"
 MYSQL_USER="-uroot"
 MYSQL_ARGS="$MYSQL_USER $SOCKET"
 
-$MYSQL $MYSQL_ARGS tpcds < mariadb-tpcds-tooling2/aux-tables.sql
-
 # Generate the queries
 (
   cd v2.8.0rc4

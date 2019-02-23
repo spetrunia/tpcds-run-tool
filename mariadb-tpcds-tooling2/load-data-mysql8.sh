@@ -12,6 +12,7 @@ MYSQL_ARGS="$MYSQL_USER $SOCKET"
 $MYSQL $MYSQL_ARGS -e "create database tpcds"
 $MYSQL $MYSQL_ARGS tpcds < mariadb-tpcds-tooling2/ddl/tables.sql
 $MYSQL $MYSQL_ARGS tpcds < mariadb-tpcds-tooling2/ddl/indexes.sql
+$MYSQL $MYSQL_ARGS tpcds < mariadb-tpcds-tooling2/aux-tables.sql
 
 DATA_FILES_DIR="`pwd`/data-for-mysql/"
 

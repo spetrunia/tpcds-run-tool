@@ -9,8 +9,6 @@ rm -rf tmp
 # Compile the toolkit, unmodified
 (
   cd v2.8.0rc4-pg/tools
- # mv makefile makefile.original
- # sed  's/^\(CFLAGS.*\)$/\1 -D_MYSQL/' < makefile.original > makefile
   make
 )
 
