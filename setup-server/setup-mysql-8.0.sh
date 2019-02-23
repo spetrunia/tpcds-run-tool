@@ -5,10 +5,12 @@ HOMEDIR=`pwd`
 BRANCH=8.0
 SERVER_VERSION=8.0
 
-git clone --branch $BRANCH https://github.com/mysql/mysql-server.git mysql-$SERVER_VERSION
+git clone --branch $BRANCH --depth 1 https://github.com/mysql/mysql-server.git mysql-$SERVER_VERSION
 
 cd mysql-$SERVER_VERSION
-cmake . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_BOOST=1 -DWITH_BOOST=$HOMEDIR/mysql-boost -DENABLE_DOWNLOADS=1
+cmake . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_BOOST=1 -DWITH_BOOST=$HOMEDIR/mysql-boost \
+ -DENABLE_DOWNLOADS=1 -DFORCE_INSOURCE_BUILD=1 -DWITH_UNIT_TESTS=0
+
 make -j8
 
 cd mysql-test
