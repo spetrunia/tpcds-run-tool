@@ -1,0 +1,471 @@
+diff -urpN v2.8.0rc4-pg.orig/query_templates/netezza.tpl v2.8.0rc4-pg/query_templates/netezza.tpl
+--- v2.8.0rc4-pg.orig/query_templates/netezza.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/netezza.tpl	2019-02-22 15:45:13.862880630 +0300
+@@ -35,3 +35,10 @@
+ define __LIMITA = "";
+ define __LIMITB = "";
+ define __LIMITC = "limit %d";
++define _END = "insert into my_tpcds_result select query_name, query_stream, query_start_time, 1000*extract(epoch from (current_timestamp(6) - query_start_time)) from my_tpcds_cur_query;";
++
++delete from my_tpcds_cur_query;
++select concat('LOG_','START') as header, '[_TEMPLATE]';
++insert into my_tpcds_cur_query values('[_TEMPLATE]', '[_STREAM]', current_timestamp(6));
++
++
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query12.tpl v2.8.0rc4-pg/query_templates/query12.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query12.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query12.tpl	2019-02-22 00:50:14.083799562 +0300
+@@ -55,7 +55,7 @@ where
+   	and i_category in ('[CATEGORY.1]', '[CATEGORY.2]', '[CATEGORY.3]')
+   	and ws_sold_date_sk = d_date_sk
+ 	and d_date between cast('[SDATE]' as date) 
+-				and (cast('[SDATE]' as date) + 30 days)
++				and (cast('[SDATE]' as date) + interval '30 days')
+ group by 
+ 	i_item_id
+         ,i_item_desc 
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query16.tpl v2.8.0rc4-pg/query_templates/query16.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query16.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query16.tpl	2019-02-22 00:54:18.017075256 +0300
+@@ -55,7 +55,7 @@ from
+   ,call_center
+ where
+     d_date between '[YEAR]-[MONTH]-01' and 
+-           (cast('[YEAR]-[MONTH]-01' as date) + 60 days)
++           (cast('[YEAR]-[MONTH]-01' as date) + interval '60 days')
+ and cs1.cs_ship_date_sk = d_date_sk
+ and cs1.cs_ship_addr_sk = ca_address_sk
+ and ca_state = '[STATE]'
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query20.tpl v2.8.0rc4-pg/query_templates/query20.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query20.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query20.tpl	2019-02-22 00:54:29.261145703 +0300
+@@ -52,7 +52,7 @@
+    and i_category in ('[CATEGORY.1]', '[CATEGORY.2]', '[CATEGORY.3]')
+    and cs_sold_date_sk = d_date_sk
+  and d_date between cast('[SDATE]' as date) 
+- 				and (cast('[SDATE]' as date) + 30 days)
++ 				and (cast('[SDATE]' as date) + interval '30 days')
+  group by i_item_id
+          ,i_item_desc 
+          ,i_category
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query21.tpl v2.8.0rc4-pg/query_templates/query21.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query21.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query21.tpl	2019-02-22 00:54:35.649185553 +0300
+@@ -53,8 +53,8 @@
+      and i_item_sk          = inv_item_sk
+      and inv_warehouse_sk   = w_warehouse_sk
+      and inv_date_sk    = d_date_sk
+-     and d_date between (cast ('[SALES_DATE]' as date) - 30 days)
+-                    and (cast ('[SALES_DATE]' as date) + 30 days)
++     and d_date between (cast ('[SALES_DATE]' as date) - interval '30 days')
++                    and (cast ('[SALES_DATE]' as date) + interval '30 days')
+    group by w_warehouse_name, i_item_id) x
+  where (case when inv_before > 0 
+              then inv_after / inv_before 
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query23.tpl v2.8.0rc4-pg/query_templates/query23.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query23.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query23.tpl	2019-02-22 03:37:22.419339632 +0300
+@@ -56,7 +56,7 @@
+         where ss_customer_sk = c_customer_sk
+          and ss_sold_date_sk = d_date_sk
+          and d_year in ([YEAR],[YEAR]+1,[YEAR]+2,[YEAR]+3) 
+-        group by c_customer_sk)),
++        group by c_customer_sk) as TBL_1),
+  best_ss_customer as
+  (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales
+   from store_sales
+@@ -84,7 +84,7 @@ from
+          and d_moy = [MONTH] 
+          and ws_sold_date_sk = d_date_sk 
+          and ws_item_sk in (select item_sk from frequent_ss_items)
+-         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) 
++         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) as TBL_2  
+  [_LIMITC]; 
+  
+  with frequent_ss_items as
+@@ -106,7 +106,7 @@ from
+         where ss_customer_sk = c_customer_sk
+          and ss_sold_date_sk = d_date_sk
+          and d_year in ([YEAR],[YEAR]+1,[YEAR]+2,[YEAR]+3)
+-        group by c_customer_sk)),
++        group by c_customer_sk)as TBL_3 ),
+  best_ss_customer as
+  (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales
+   from store_sales
+@@ -139,6 +139,6 @@ from
+          and ws_item_sk in (select item_sk from frequent_ss_items)
+          and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)
+          and ws_bill_customer_sk = c_customer_sk
+-       group by c_last_name,c_first_name) 
++       group by c_last_name,c_first_name) as TBL_4  
+      order by c_last_name,c_first_name,sales
+   [_LIMITC];
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query2.tpl v2.8.0rc4-pg/query_templates/query2.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query2.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query2.tpl	2019-02-22 03:33:55.742301102 +0300
+@@ -37,13 +37,13 @@
+  with wscs as
+  (select sold_date_sk
+         ,sales_price
+-  from  select ws_sold_date_sk sold_date_sk
++  from  (select ws_sold_date_sk sold_date_sk
+               ,ws_ext_sales_price sales_price
+         from web_sales 
+         union all
+         select cs_sold_date_sk sold_date_sk
+               ,cs_ext_sales_price sales_price
+-        from catalog_sales),
++        from catalog_sales) as TBL_1),
+  wswscs as 
+  (select d_week_seq,
+         sum(case when (d_day_name='Sunday') then sales_price else null end) sun_sales,
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query30.tpl v2.8.0rc4-pg/query_templates/query30.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query30.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query30.tpl	2019-02-22 01:16:23.796044971 +0300
+@@ -50,7 +50,7 @@
+          ,ca_state)
+  [_LIMITA] select [_LIMITB] c_customer_id,c_salutation,c_first_name,c_last_name,c_preferred_cust_flag
+        ,c_birth_day,c_birth_month,c_birth_year,c_birth_country,c_login,c_email_address
+-       ,c_last_review_date_sk,ctr_total_return
++       ,c_last_review_date,ctr_total_return
+  from customer_total_return ctr1
+      ,customer_address
+      ,customer
+@@ -62,5 +62,5 @@
+        and ctr1.ctr_customer_sk = c_customer_sk
+  order by c_customer_id,c_salutation,c_first_name,c_last_name,c_preferred_cust_flag
+                   ,c_birth_day,c_birth_month,c_birth_year,c_birth_country,c_login,c_email_address
+-                  ,c_last_review_date_sk,ctr_total_return
++                  ,c_last_review_date,ctr_total_return
+ [_LIMITC];
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query32.tpl v2.8.0rc4-pg/query_templates/query32.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query32.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query32.tpl	2019-02-22 00:54:35.661185628 +0300
+@@ -46,7 +46,7 @@ where
+ i_manufact_id = [IMID]
+ and i_item_sk = cs_item_sk 
+ and d_date between '[CSDATE]' and 
+-        (cast('[CSDATE]' as date) + 90 days)
++        (cast('[CSDATE]' as date) + interval '90 days')
+ and d_date_sk = cs_sold_date_sk 
+ and cs_ext_discount_amt  
+      > ( 
+@@ -58,7 +58,7 @@ and cs_ext_discount_amt
+          where 
+               cs_item_sk = i_item_sk 
+           and d_date between '[CSDATE]' and
+-                             (cast('[CSDATE]' as date) + 90 days)
++                             (cast('[CSDATE]' as date) + interval '90 days')
+           and d_date_sk = cs_sold_date_sk 
+       ) 
+ [_LIMITC]; 
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query37.tpl v2.8.0rc4-pg/query_templates/query37.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query37.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query37.tpl	2019-02-22 00:54:35.669185677 +0300
+@@ -45,7 +45,7 @@
+  where i_current_price between [PRICE] and [PRICE] + 30
+  and inv_item_sk = i_item_sk
+  and d_date_sk=inv_date_sk
+- and d_date between cast('[INVDATE]' as date) and (cast('[INVDATE]' as date) +  60 days)
++ and d_date between cast('[INVDATE]' as date) and (cast('[INVDATE]' as date) + interval '60 days')
+  and i_manufact_id in ([MANUFACT_ID.1],[MANUFACT_ID.2],[MANUFACT_ID.3],[MANUFACT_ID.4])
+  and inv_quantity_on_hand between 100 and 500
+  and cs_item_sk = i_item_sk
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query40.tpl v2.8.0rc4-pg/query_templates/query40.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query40.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query40.tpl	2019-02-22 00:54:35.673185703 +0300
+@@ -55,8 +55,8 @@
+  and i_item_sk          = cs_item_sk
+  and cs_warehouse_sk    = w_warehouse_sk 
+  and cs_sold_date_sk    = d_date_sk
+- and d_date between (cast ('[SALES_DATE]' as date) - 30 days)
+-                and (cast ('[SALES_DATE]' as date) + 30 days) 
++ and d_date between (cast ('[SALES_DATE]' as date) - interval '30 days')
++                and (cast ('[SALES_DATE]' as date) + interval '30 days') 
+  group by
+     w_state,i_item_id
+  order by w_state,i_item_id
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query49.tpl v2.8.0rc4-pg/query_templates/query49.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query49.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query49.tpl	2019-02-22 01:17:23.852333271 +0300
+@@ -159,6 +159,6 @@
+  or 
+  store.currency_rank <= 10
+  )
+- )
++ ) as TBL_1
+  order by 1,4,5,2
+  [_LIMITC];
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query5.tpl v2.8.0rc4-pg/query_templates/query5.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query5.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query5.tpl	2019-02-22 00:54:35.677185727 +0300
+@@ -63,7 +63,7 @@
+      store
+  where date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date) 
+-                  and (cast('[SALES_DATE]' as date) +  14 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '14 days')
+        and store_sk = s_store_sk
+  group by s_store_id)
+  ,
+@@ -94,7 +94,7 @@
+      catalog_page
+  where date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  14 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '14 days')
+        and page_sk = cp_catalog_page_sk
+  group by cp_catalog_page_id)
+  ,
+@@ -127,7 +127,7 @@
+      web_site
+  where date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  14 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '14 days')
+        and wsr_web_site_sk = web_site_sk
+  group by web_site_id)
+  [_LIMITA] select [_LIMITB] channel
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query77.tpl v2.8.0rc4-pg/query_templates/query77.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query77.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query77.tpl	2019-02-22 00:54:35.689185801 +0300
+@@ -45,7 +45,7 @@
+       store
+  where ss_sold_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date) 
+-                  and (cast('[SALES_DATE]' as date) +  30 days) 
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days') 
+        and ss_store_sk = s_store_sk
+  group by s_store_sk)
+  ,
+@@ -58,7 +58,7 @@
+       store
+  where sr_returned_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+        and sr_store_sk = s_store_sk
+  group by s_store_sk), 
+  cs as
+@@ -69,7 +69,7 @@
+       date_dim
+  where cs_sold_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+  group by cs_call_center_sk 
+  ), 
+  cr as
+@@ -80,7 +80,7 @@
+       date_dim
+  where cr_returned_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+  group by cr_call_center_sk
+  ), 
+  ws as
+@@ -92,7 +92,7 @@
+       web_page
+  where ws_sold_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+        and ws_web_page_sk = wp_web_page_sk
+  group by wp_web_page_sk), 
+  wr as
+@@ -104,7 +104,7 @@
+       web_page
+  where wr_returned_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+        and wr_web_page_sk = wp_web_page_sk
+  group by wp_web_page_sk)
+  [_LIMITA] select [_LIMITB] channel
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query80.tpl v2.8.0rc4-pg/query_templates/query80.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query80.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query80.tpl	2019-02-22 00:53:09.060634272 +0300
+@@ -49,7 +49,7 @@
+      promotion
+  where ss_sold_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date) 
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+        and ss_store_sk = s_store_sk
+        and ss_item_sk = i_item_sk
+        and i_current_price > 50
+@@ -70,7 +70,7 @@
+      promotion
+  where cs_sold_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+         and cs_catalog_page_sk = cp_catalog_page_sk
+        and cs_item_sk = i_item_sk
+        and i_current_price > 50
+@@ -91,7 +91,7 @@ group by cp_catalog_page_id)
+      promotion
+  where ws_sold_date_sk = d_date_sk
+        and d_date between cast('[SALES_DATE]' as date)
+-                  and (cast('[SALES_DATE]' as date) +  30 days)
++                  and (cast('[SALES_DATE]' as date) +  interval '30 days')
+         and ws_web_site_sk = web_site_sk
+        and ws_item_sk = i_item_sk
+        and i_current_price > 50
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query82.tpl v2.8.0rc4-pg/query_templates/query82.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query82.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query82.tpl	2019-02-22 00:54:35.693185828 +0300
+@@ -45,7 +45,7 @@
+  where i_current_price between [PRICE] and [PRICE]+30
+  and inv_item_sk = i_item_sk
+  and d_date_sk=inv_date_sk
+- and d_date between cast('[INVDATE]' as date) and (cast('[INVDATE]' as date) +  60 days)
++ and d_date between cast('[INVDATE]' as date) and (cast('[INVDATE]' as date) + interval '60 days')
+  and i_manufact_id in ([MANUFACT_ID.1],[MANUFACT_ID.2],[MANUFACT_ID.3],[MANUFACT_ID.4])
+  and inv_quantity_on_hand between 100 and 500
+  and ss_item_sk = i_item_sk
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query92.tpl v2.8.0rc4-pg/query_templates/query92.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query92.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query92.tpl	2019-02-22 00:54:35.705185902 +0300
+@@ -48,7 +48,7 @@ where
+ i_manufact_id = [IMID]
+ and i_item_sk = ws_item_sk 
+ and d_date between '[WSDATE]' and 
+-        (cast('[WSDATE]' as date) + 90 days)
++        (cast('[WSDATE]' as date) + interval '90 days')
+ and d_date_sk = ws_sold_date_sk 
+ and ws_ext_discount_amt  
+      > ( 
+@@ -60,7 +60,7 @@ and ws_ext_discount_amt
+          WHERE 
+               ws_item_sk = i_item_sk 
+           and d_date between '[WSDATE]' and
+-                             (cast('[WSDATE]' as date) + 90 days)
++                             (cast('[WSDATE]' as date) + interval '90 days')
+           and d_date_sk = ws_sold_date_sk 
+       ) 
+ order by sum(ws_ext_discount_amt)
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query94.tpl v2.8.0rc4-pg/query_templates/query94.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query94.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query94.tpl	2019-02-22 00:54:35.709185927 +0300
+@@ -49,7 +49,7 @@ from
+   ,web_site
+ where
+     d_date between '[YEAR]-[MONTH]-01' and 
+-           (cast('[YEAR]-[MONTH]-01' as date) + 60 days)
++           (cast('[YEAR]-[MONTH]-01' as date) + interval '60 days')
+ and ws1.ws_ship_date_sk = d_date_sk
+ and ws1.ws_ship_addr_sk = ca_address_sk
+ and ca_state = '[STATE]'
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query95.tpl v2.8.0rc4-pg/query_templates/query95.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query95.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query95.tpl	2019-02-22 00:54:35.717185977 +0300
+@@ -54,7 +54,7 @@ from
+   ,web_site
+ where
+     d_date between '[YEAR]-[MONTH]-01' and 
+-           (cast('[YEAR]-[MONTH]-01' as date) + 60 days)
++           (cast('[YEAR]-[MONTH]-01' as date) + interval '60 days')
+ and ws1.ws_ship_date_sk = d_date_sk
+ and ws1.ws_ship_addr_sk = ca_address_sk
+ and ca_state = '[STATE]'
+diff -urpN v2.8.0rc4-pg.orig/query_templates/query98.tpl v2.8.0rc4-pg/query_templates/query98.tpl
+--- v2.8.0rc4-pg.orig/query_templates/query98.tpl	2018-02-15 07:41:02.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/query98.tpl	2019-02-22 00:54:02.604978053 +0300
+@@ -54,7 +54,7 @@ where
+   	and i_category in ('[CATEGORY.1]', '[CATEGORY.2]', '[CATEGORY.3]')
+   	and ss_sold_date_sk = d_date_sk
+ 	and d_date between cast('[SDATE]' as date) 
+-				and (cast('[SDATE]' as date) + 30 days)
++				and (cast('[SDATE]' as date) + interval '30 days')
+ group by 
+ 	i_item_id
+         ,i_item_desc 
+diff -urpN v2.8.0rc4-pg.orig/query_templates/templates-for-mariadb.lst v2.8.0rc4-pg/query_templates/templates-for-mariadb.lst
+--- v2.8.0rc4-pg.orig/query_templates/templates-for-mariadb.lst	1970-01-01 03:00:00.000000000 +0300
++++ v2.8.0rc4-pg/query_templates/templates-for-mariadb.lst	2019-02-22 00:34:19.939665260 +0300
+@@ -0,0 +1,83 @@
++query1.tpl
++query2.tpl
++query3.tpl
++query4.tpl
++query6.tpl
++query7.tpl
++query9.tpl
++query10.tpl
++query11.tpl
++query12.tpl
++query13.tpl
++query15.tpl
++query16.tpl
++query17.tpl
++query19.tpl
++query20.tpl
++query21.tpl
++query23.tpl
++query24.tpl
++query25.tpl
++query26.tpl
++query28.tpl
++query29.tpl
++query30.tpl
++query31.tpl
++query32.tpl
++query33.tpl
++query34.tpl
++query35.tpl
++query37.tpl
++query39.tpl
++query40.tpl
++query41.tpl
++query42.tpl
++query43.tpl
++query44.tpl
++query45.tpl
++query46.tpl
++query47.tpl
++query48.tpl
++query49.tpl
++query50.tpl
++query52.tpl
++query53.tpl
++query55.tpl
++query56.tpl
++query57.tpl
++query58.tpl
++query59.tpl
++query60.tpl
++query61.tpl
++query62.tpl
++query63.tpl
++query64.tpl
++query65.tpl
++query66.tpl
++query67.tpl
++query68.tpl
++query69.tpl
++query71.tpl
++query72.tpl
++query73.tpl
++query74.tpl
++query75.tpl
++query76.tpl
++query78.tpl
++query79.tpl
++query81.tpl
++query82.tpl
++query83.tpl
++query84.tpl
++query85.tpl
++query88.tpl
++query89.tpl
++query90.tpl
++query91.tpl
++query92.tpl
++query93.tpl
++query94.tpl
++query95.tpl
++query96.tpl
++query98.tpl
++query99.tpl
