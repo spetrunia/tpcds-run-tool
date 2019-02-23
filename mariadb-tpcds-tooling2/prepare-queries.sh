@@ -2,12 +2,6 @@
 
 set -e
 
-# TODO: factor out the config soemwhere
-MYSQL="./mariadb-10.2/client/mysql"
-SOCKET="--socket=/tmp/mysql20.sock"
-MYSQL_USER="-uroot"
-MYSQL_ARGS="$MYSQL_USER $SOCKET"
-
 # Generate the queries
 (
   cd v2.8.0rc4
@@ -28,6 +22,4 @@ MYSQL_ARGS="$MYSQL_USER $SOCKET"
   ls -lah ../../queries-for-mysql
 )
 
-#$MYSQL $MYSQL_ARGS tpcds < mariadb-tpcds-tooling/v2.8.0rc4/tools/tmp-queries/query_0.sql | tee benchmark-output-raw.txt
-#grep LOG_END benchmark-output-raw.txt | sort | awk '//{printf ("%s %s\n" , $2, $3) }'
 
