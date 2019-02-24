@@ -14,7 +14,7 @@
   -dialect netezza \
   -verbose y \
   -qualify y  \
-  -rngseed 1234 \
+  -rngseed 5678 \
   -streams 20 \
   -directory ../query_templates \
   -input ../query_templates/templates-for-mariadb.lst \

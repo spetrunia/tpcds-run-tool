@@ -16,7 +16,7 @@ unzip tpc-ds-tool.zip
 (
   cd v2.8.0rc4/tools
   mkdir -p ../../data-for-mysql
-  ./dsdgen -scale 1 -rngseed 1234 -dir ../../data-for-mysql
+  ./dsdgen -scale 1 -rngseed 5678 -dir ../../data-for-mysql
   du -sh ../../data-for-mysql
 )
 

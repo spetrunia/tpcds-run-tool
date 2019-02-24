@@ -16,7 +16,7 @@ rm -rf tmp
 (
   cd v2.8.0rc4-pg/tools
   mkdir -p ../../data-for-pg
-  ./dsdgen -terminate n -scale 1 -dir ../../data-for-pg
+  ./dsdgen -terminate n -scale 1 -rngseed 5678 -dir ../../data-for-pg
   du -sh ../../data-for-pg
 )
 
@@ -32,5 +32,7 @@ DATA_FILES_DIR="`pwd`/data-for-pg/"
 bash mariadb-tpcds-tooling2/ddl-pg/load.sql.sh $DATA_FILES_DIR > load-pg.sql
 
 postgresql-11.2-inst/bin/psql tpcds < load-pg.sql
+echo 'analyze;' | postgresql-11.2-inst/bin/psql tpcds
+echo 'analyze;' | postgresql-11.2-inst/bin/psql tpcds
 
 
