@@ -1,12 +1,23 @@
 #!/bin/bash
 
 set -e
+
+
 if [ "x${1}y" == "xy" ] ; then 
   echo "Usage: $0 BRANCH_NAME"
   exit 1
 fi
 
+
 BRANCH="${1}"
+HOMEDIR=`pwd`
+DATADIR="$HOMEDIR/mariadb-$BRANCH-data"
+
+if [ -d $DATADIR ] ; then
+  echo "Data directort $DATADIR exists, will not overwrite it "
+  du -hs $DATADIR
+  exit 1;
+fi
 
 git clone --branch $BRANCH --depth 1 https://github.com/MariaDB/server.git mariadb-$BRANCH
 
@@ -20,13 +31,17 @@ make -j8
 cd .. 
 )
 
-HOMEDIR=`pwd`
-DATADIR="$HOMEDIR/mariadb-$BRANCH-data"
 (
   cd mariadb-$BRANCH/mysql-test
   ./mtr alias
   cp -r var/install.db $DATADIR
 )
+
+# Guess a reasonable socket name
+source_dir=`pwd`
+socket_name=`basename $source_dir`
+SOCKETNAME="/tmp/$socket_name"
+
 
 # plugin-load=ha_rocksdb.so
 # default-storage-engine=rocksdb
@@ -48,13 +63,20 @@ log-error
 lc_messages_dir=$HOMEDIR/mariadb-$BRANCH/sql/share
 
 tmpdir=/tmp
-port=3306
-socket=/tmp/mysql20.sock
+port=3341
+socket=$SOCKETNAME
 gdb
 server-id=12
 
 innodb_buffer_pool_size=8G
 
+EOF
+
+cat > mysql-config.sh <<EOF
+MYSQL="./mariadb-$BRANCH/client/mysql"
+MYSQL_SOCKET="--socket=$SOCKETNAME"
+MYSQL_USER="-uroot"
+MYSQL_ARGS="\$MYSQL_USER \$MYSQL_SOCKET"
 EOF
 
 cd $HOMEDIR/mariadb-$BRANCH/sql

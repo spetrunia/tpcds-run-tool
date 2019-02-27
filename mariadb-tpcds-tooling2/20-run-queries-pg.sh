@@ -7,5 +7,12 @@ ls queries-for-pg/*.sql | while read a ; do
   ./postgresql-11.2-inst/bin/psql tpcds < $a |  tee benchmark-output-raw.txt
 done
 
-#grep LOG_END benchmark-output-raw.txt | sort | awk '//{printf ("%s %s\n" , $2, $3) }'
+cat << END
+select 
+  query_stream, count(*), sum(query_time_ms) 
+from
+  my_tpcds_result
+group by
+  query_stream;
+END | ./postgresql-11.2-inst/bin/psql tpcds  | tee pg-result.txt
 
