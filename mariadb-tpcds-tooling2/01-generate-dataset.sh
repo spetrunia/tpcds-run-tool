@@ -16,6 +16,8 @@ fi
 
 if [ ! -d v2.8.0rc4 ] ; then 
 
+  unzip tpc-ds-tool.zip
+  
 # Modify the toolkit to produce MySQL dialect and compile it
   (
     cd v2.8.0rc4/tools

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "THis script is out of date"
+exit 1
 
 # TODO: factor out the config soemwhere, and then this is the same as with MariaDB
 MYSQL="./mysql-8.0/runtime_output_directory/mysql"
