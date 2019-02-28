@@ -35,7 +35,7 @@ fi
   du -sh ../../data-for-pg
 )
 
-cat > data-for-postgresql.txt <<END
+cat > data-for-pg.txt <<END
 RNGSEED_DATASET=$RNGSEED_DATASET
 END
 

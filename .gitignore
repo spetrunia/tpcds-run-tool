@@ -1,0 +1,15 @@
+# Dataset (not loaded)
+data-for-pg
+data-for-pg.txt
+v2.8.0rc4-pg
+queries-for-pg.txt
+queries-for-pg
+
+# PostgreSQL itself
+postgresql-11.2
+postgresql-11.2-inst
+pgdata
+
+# logs
+logs
+pglogfile
