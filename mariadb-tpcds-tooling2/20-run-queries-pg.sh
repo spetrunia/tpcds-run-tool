@@ -9,7 +9,9 @@ done
 
 (./postgresql-11.2-inst/bin/psql tpcds  | tee pg-result.txt) << END
 select 
-  query_stream, count(*), sum(query_time_ms) / (60*1000)
+  query_stream, 
+  count(*) as n_queries, 
+  sum(query_time_ms) / (60*1000) as total_time_sec
 from
   my_tpcds_result
 group by
