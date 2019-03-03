@@ -16,5 +16,5 @@ from
   my_tpcds_result
 group by
   query_stream;
-END 
+END
 
