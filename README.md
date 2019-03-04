@@ -6,6 +6,7 @@ This is a very basic set of scripts to automate the tasks of
 * Generation of TPC-DS dataset and its read queries (that is, this is not the whole benchmark)
 * Loading the dataset and running the queries.
 
+# Geting TPC-DS to run
 MySQL/MariaDB cannot run all of the TPC-DS queries (See
 https://jira.mariadb.org/browse/MDEV-17802 for details). The scripts here patch 
 tpc-ds-tool:
@@ -28,7 +29,7 @@ Look at (or run)  `setup_server/setup-os-ubuntu.sh` to see what packages need to
 
 Just run `run-all-mariadb-10.4.sh` to do all the steps with MariaDB 10.4.
 
-Run `run-all-pg.sh` to do all the steps with PostgreSQL 11 (compiled from source)
+Run `run-all-pg.sh` to do all the steps with PostgreSQL 11.
 
 # Benchmark results
 
