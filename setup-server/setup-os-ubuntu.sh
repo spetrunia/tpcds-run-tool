@@ -7,6 +7,8 @@ if [ -e /etc/debian_version ] ; then
 
   sudo apt-get -y install libzstd0
   sudo apt-get -y install libssl-dev
+  
+  sudo apt-get install libgnutls28-dev
 
 # percona server:
   sudo apt-get -y install libcurl4-gnutls-dev
@@ -15,5 +17,8 @@ if [ -e /etc/debian_version ] ; then
 
   sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/libz.so
   sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+
+# Need unzip to unpack TPC-DS generator
+  sudo apt-get -y install unzip
 fi
 
