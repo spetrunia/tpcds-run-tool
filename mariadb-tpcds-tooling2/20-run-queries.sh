@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [ ! -f mysql-config.sh ] ; then
-  echo "Cannot find mysql-config.sh - did you setup the db?"
+if [ ! -f mysql-vars.sh ] ; then
+  echo "Cannot find mysql-vars.sh - did you setup the db?"
   exit 1;
 fi
 
-source mysql-config.sh
+source mysql-vars.sh
 echo "Running data using $MYSQL $MYSQL_ARGS";
 
 ls queries-for-mysql/*.sql | while read a ; do

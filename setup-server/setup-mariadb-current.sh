@@ -72,7 +72,7 @@ innodb_buffer_pool_size=8G
 
 EOF
 
-cat > mysql-config.sh <<EOF
+cat > mysql-vars.sh <<EOF
 MYSQL="./mariadb-$BRANCH/client/mysql"
 MYSQL_SOCKET="--socket=$SOCKETNAME"
 MYSQL_USER="-uroot"
