@@ -8,7 +8,7 @@ if [ -e /etc/debian_version ] ; then
   sudo apt-get -y install libzstd0
   sudo apt-get -y install libssl-dev
   
-  sudo apt-get install libgnutls28-dev
+  sudo apt-get -y install libgnutls28-dev
 
 # percona server:
   sudo apt-get -y install libcurl4-gnutls-dev
